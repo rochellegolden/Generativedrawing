@@ -2,12 +2,13 @@ PImage img;
 float rotation = 0;
 boolean drawAlbert = false;
 
-int numPaths = 5;
+int numPaths = 100;
 float[] xPos;
 float[] yPos;
 float[] rotations;
 float[] scales;      // Added for varying sizes
 int[] shapeTypes;    // Track shape type for each path
+
 
 void setup() {
   size(600, 600);
@@ -24,17 +25,20 @@ void setup() {
   scales = new float[numPaths];
   shapeTypes = new int[numPaths];
   
+  // Initialize the paths and draw for the first time
   resetPaths();
   drawGenerative();
 }
 
+
 void resetPaths() {
   for (int i = 0; i < numPaths; i++) {
-    xPos[i] = width/2;
-    yPos[i] = height/2;
+    // Spread starting positions across the canvas
+    xPos[i] = random(width);
+    yPos[i] = random(height);
     rotations[i] = random(TWO_PI);
     scales[i] = random(0.5, 1.5);
-    shapeTypes[i] = int(random(6)); // Now supporting 6 different shape types
+    shapeTypes[i] = int(random(6));
   }
 }
 
@@ -43,40 +47,41 @@ void draw() {
     image(img, 0, 0);
     drawAlbert = false;
   }
+  
+  if (keyPressed) {
+    if (key == 'd' || key == 'D') {
+      background(220);
+      resetPaths();
+      drawGenerative();
+    }
+    if (key == 'r' || key == 'R') {
+      drawAlbert = true;
+    }
+  }
 }
 
-void keyPressed() {
-  if (key == 'r' || key == 'R') {
-    drawAlbert = true;
-  }
-  if (key == 'd' || key == 'D') {
-    background(220);
-    resetPaths();
-    drawGenerative();
-  }
-}
 
-void drawGenerative() {
-  for (int i = 0; i < 1000; i++) {
+
+    void drawGenerative() {
+    println("Starting to draw...");  // Debug message
+    for (int i = 0; i < 2000; i++) {
     for (int p = 0; p < numPaths; p++) {
       color c = img.get(int(xPos[p]), int(yPos[p]));
       float alpha = map(brightness(c), 0, 255, 150, 50);
       stroke(c, alpha);
       
       float brightness = brightness(c);
-      float stepX = map(brightness, 0, 255, -5, 5);
-      float stepY = map(brightness, 0, 255, -5, 5);
-
-      stepX += random(-2, 2) * (p + 1) * 0.2;
-      stepY += random(-2, 2) * (p + 1) * 0.2;
+      float stepX = map(brightness, 0, 255, -2, 2);
+      float stepY = map(brightness, 0, 255, -2, 2);
+      stepX += random(-1, 1) * (p + 1) * 0.1;
+      stepY += random(-1, 1) * (p + 1) * 0.1;
       
-      float size = map(brightness, 0, 255, 2, 15) * scales[p];
+      float size = map(brightness, 0, 255, 1, 15) * scales[p];
       
       pushMatrix();
       translate(xPos[p], yPos[p]);
       rotate(rotations[p]);
       
-      // Enhanced shape variations
       drawComplexShape(p, size, brightness);
       
       popMatrix();
@@ -111,7 +116,7 @@ void drawComplexShape(int pathIndex, float size, float brightness) {
       
     case 1:
       // Flower Pattern
-      int petals = 6;
+      int petals = 7;
       for (int i = 0; i < petals; i++) {
         pushMatrix();
         rotate(TWO_PI * i / petals);
